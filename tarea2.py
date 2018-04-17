@@ -15,6 +15,10 @@ import random
 
 # Third-party libraries
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+
+
 
 class Network(object):
 
@@ -121,6 +125,10 @@ class Network(object):
         neuron in the final layer has the highest activation."""
         test_results = [(np.argmax(self.feedforward(x)), y)
                         for (x, y) in test_data]
+        #for (x, y) in test_data:
+            #print(x)
+            #print('---')
+            #print(self.feedforward(x))
         return sum(int(x == y) for (x, y) in test_results)
 
     def cost_derivative(self, output_activations, y):
@@ -138,7 +146,7 @@ def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
 
-net = Network([2, 6, 2])
+net = Network([2, 3, 2])
 
 data = [( np.array([[0], [0]]) , np.array([0]) ), 
         ( np.array([[1], [1]]) , np.array([0]) ),
@@ -146,7 +154,23 @@ data = [( np.array([[0], [0]]) , np.array([0]) ),
         ( np.array([[1], [0]]) , np.array([1]) )]
 
 
-net.SGD(data, 1000000, 4, 0.1, test_data=data)
+net.SGD(data, 20000, 4, 0.1, test_data=data)
 
 print(net.weights)
 print(net.biases)
+
+np.random.seed(19680801)
+
+matplotlib.rcParams['axes.unicode_minus'] = False
+fig, ax = plt.subplots()
+
+for x in np.arange(-3.0, 3.0, 0.2):
+  for y in np.arange(-3.0, 3.0, 0.2):
+
+    if np.argmax(net.feedforward(np.array([[x], [y]]))) > 0.5:
+        ax.plot(x, y, 'o', color='g')
+    else:
+        ax.plot(x, y, 'o', color='b')
+        
+ax.set_title('Using hyphen instead of Unicode minus')
+plt.show()
