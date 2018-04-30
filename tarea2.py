@@ -45,16 +45,11 @@ class Network(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
-            test_data=None):
+    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
         ``(x, y)`` representing the training inputs and the desired
-        outputs.  The other non-optional parameters are
-        self-explanatory.  If ``test_data`` is provided then the
-        network will be evaluated against the test data after each
-        epoch, and partial progress printed out.  This is useful for
-        tracking progress, but slows things down substantially."""
+        outputs."""
         if test_data: n_test = len(test_data)
         n = len(training_data)
         for j in range(epochs):
@@ -62,10 +57,9 @@ class Network(object):
             self.update_mini_batch(training_data, eta)
             if test_data:
                 print(f"Epoch {j}: {self.evaluate(test_data)} / {n_test}")
-                if self.evaluate(test_data) == n_test:
-                    break
             else:
-                print(f"Epoch {j} complete")
+                pass
+                #print(f"Epoch {j} complete")
 
     def update_mini_batch(self, mini_batch, eta):
         """Update the network's weights and biases by applying
@@ -74,6 +68,7 @@ class Network(object):
         is the learning rate."""
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
+
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
@@ -100,8 +95,7 @@ class Network(object):
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
-        delta = self.cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
+        delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note that the variable l in the loop below is used a little
@@ -131,6 +125,7 @@ class Network(object):
             #print(self.feedforward(x))
         return sum(int(x == y) for (x, y) in test_results)
 
+
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
@@ -146,19 +141,21 @@ def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
 
-net = Network([2, 3, 2])
+net = Network([2, 2, 1])
 
-data = [( np.array([[0], [0]]) , np.array([0]) ), 
-        ( np.array([[1], [1]]) , np.array([0]) ),
-        ( np.array([[0], [1]]) , np.array([1]) ),
-        ( np.array([[1], [0]]) , np.array([1]) )]
+data = [( np.array([[0], [0]]) , np.array([1]) ), 
+        ( np.array([[0], [1]]) , np.array([0]) ),
+        ( np.array([[1], [0]]) , np.array([0]) ),
+        ( np.array([[1], [1]]) , np.array([1]) )]
 
 
-net.SGD(data, 20000, 4, 0.1, test_data=data)
+net.SGD(data, 9000, 4, 0.3)
 
-print(net.weights)
-print(net.biases)
 
+for (x, y) in data:
+    print(f"Entrada {x}, salida esperada {y} | salida de la red {net.feedforward(x)}")
+
+"""
 np.random.seed(19680801)
 
 matplotlib.rcParams['axes.unicode_minus'] = False
@@ -172,5 +169,6 @@ for x in np.arange(-3.0, 3.0, 0.2):
     else:
         ax.plot(x, y, 'o', color='b')
         
-ax.set_title('Using hyphen instead of Unicode minus')
+ax.set_title('Mapa de clasificación')
 plt.show()
+"""
